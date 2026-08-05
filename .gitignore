@@ -1,0 +1,10 @@
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.matplotlib/
+
+# Generated training data can be recreated with scripts/build_features.py.
+artifacts/features/*.csv
+

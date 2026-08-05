@@ -1,0 +1,22 @@
+[project]
+name = "nfl-weekly-predictor"
+version = "0.1.0"
+description = "Leakage-aware weekly NFL game prediction pipeline using nflverse data."
+requires-python = ">=3.11"
+dependencies = [
+    "nflreadpy>=0.1.5",
+    "pyarrow>=16.0",
+    "pandas>=2.2",
+    "scikit-learn>=1.5",
+    "seaborn>=0.13",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
