@@ -9,6 +9,7 @@ dependencies = [
     "pandas>=2.2",
     "scikit-learn>=1.5",
     "seaborn>=0.13",
+    "streamlit>=1.38",
 ]
 
 [project.optional-dependencies]
