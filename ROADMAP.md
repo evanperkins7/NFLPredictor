@@ -51,3 +51,5 @@ that a simple model can beat the market.
 - Step 4 ablations select an 8-game EPA-only configuration by walk-forward log loss and
   Brier score. The 5-game EPA-only configuration has the highest walk-forward accuracy
   and remains a documented alternative.
+- Step 5 now provides `scripts/predict_week.py`, which refreshes the previous ten
+  completed seasons plus a target schedule and exports weekly probability artifacts.

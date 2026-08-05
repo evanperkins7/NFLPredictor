@@ -30,3 +30,15 @@ unchanged. See `artifacts/model/leakage_audit.json`.
 
 Result: the 8-game EPA-only configuration is recommended for the weekly workflow based
 on walk-forward log loss and Brier score. See `artifacts/model/ablations/report.md`.
+
+## Step 5: Weekly workflow
+
+- [x] Generate features for unplayed regular-season schedule rows from completed
+  historical team statistics.
+- [x] Add the weekly prediction CLI using the selected 8-game EPA-only model.
+- [x] Export probabilities, predicted winner, and confidence tier to CSV.
+- [x] Export a static probability chart and Markdown report.
+- [x] Verify the real workflow against the 2026 Week 1 schedule.
+
+Result: the workflow generated 16 predictions successfully. See
+`artifacts/predictions/predictions_2026_week_1.csv` and the adjacent chart/report.
