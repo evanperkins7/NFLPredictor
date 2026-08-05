@@ -25,10 +25,10 @@ betting, or guaranteed decision-making advice.
 
 | Evaluation | Accuracy | Log loss | Brier score | Rows |
 | --- | ---: | ---: | ---: | ---: |
-| Selected 8-game EPA, walk-forward | 62.1% | 0.645 | 0.227 | 1,615 |
+| Selected 8-game EPA, walk-forward | 62.0% | 0.645 | 0.227 | 1,615 |
 | Selected 8-game EPA, 2024–2025 reference | 63.6% | 0.636 | 0.223 | 544 |
-| Existing expanding all-feature baseline, walk-forward | 58.2% | 0.671 | 0.238 | 1,615 |
-| Existing expanding all-feature baseline, 2024–2025 reference | 59.6% | 0.663 | 0.236 | 544 |
+| Existing expanding all-feature baseline, walk-forward | 58.3% | 0.671 | 0.238 | 1,615 |
+| Existing expanding all-feature baseline, 2024–2025 reference | 59.6% | 0.663 | 0.235 | 544 |
 
 The complete ablation tables are in
 [`summary_results.csv`](../artifacts/model/ablations/summary_results.csv) and
@@ -41,7 +41,7 @@ adversarial mutation of `2021_06_HOU_IND` left all 1,281 current-or-earlier prot
 rows unchanged. The audit is recorded in
 [`leakage_audit.json`](../artifacts/model/leakage_audit.json).
 
-The repository currently has 14 passing tests covering feature construction, temporal
+The repository currently has 18 passing tests covering feature construction, temporal
 leakage, ablations, and the weekly prediction path.
 
 ## Limitations and risks
@@ -52,6 +52,8 @@ leakage, ablations, and the weekly prediction path.
   schema and should be validated against play-by-play before being treated as a final
   defensive metric.
 - The pace proxy is play volume, not neutral-situation tempo.
+- A neutral-situation pace feature was tested using play-by-play but was not retained;
+  it did not improve walk-forward probability metrics.
 - Week-one cold-start games are omitted from the baseline.
 - Confidence tiers are not a substitute for calibration analysis or uncertainty
   intervals.

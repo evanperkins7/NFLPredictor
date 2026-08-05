@@ -26,10 +26,13 @@ row is created.
 | `defensive_epa_diff` | Prior rolling opponent-offense EPA differential | Lower is better for a team; positive favors the away team |
 | `pace_diff` | Prior rolling play-volume proxy differential | Positive means more prior volume for the home team |
 | `rest_days_diff` | Days since each team’s prior scheduled game | Positive means more home-team rest |
+| `neutral_pace_diff` | Prior rolling count of qualifying neutral offensive plays | Positive means more neutral pace for the home team |
 
 The selected production configuration uses `offensive_epa_diff` and
-`defensive_epa_diff` over the previous eight games. The current pace proxy is based on
-play volume rather than neutral-situation tempo and is not part of the selected model.
+`defensive_epa_diff` over the previous eight games. Neutral pace counts `run`, `pass`,
+and `sack` plays in quarters 1–3 when the score margin is within eight points, excluding
+penalties, deleted plays, aborted plays, kneels, and spikes. It was evaluated but not
+retained because it did not improve walk-forward probability metrics.
 
 ## Outputs
 

@@ -47,6 +47,7 @@ Run it with:
 
 The strongest lesson was that evaluation design mattered more than adding features:
 recent EPA history improved the walk-forward metrics, while the current pace proxy and
-rest differential added little. The next technical improvement is a true
-neutral-situation pace feature from play-by-play, followed by calibration analysis and
-an optional Streamlit presentation layer over the same pipeline.
+rest differential added little. The play-by-play neutral-situation pace experiment did
+not improve walk-forward probability quality, so the feature remains available for
+research but is excluded from the selected production model. The next improvements are
+calibration analysis and an optional Streamlit presentation layer over the same pipeline.

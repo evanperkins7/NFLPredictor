@@ -43,6 +43,17 @@ on walk-forward log loss and Brier score. See `artifacts/model/ablations/report.
 Result: the workflow generated 16 predictions successfully. See
 `artifacts/predictions/predictions_2026_week_1.csv` and the adjacent chart/report.
 
+## Step 7: Neutral-situation pace experiment
+
+- [x] Add a schema-checked play-by-play data boundary.
+- [x] Define and test an explicit neutral-play filter.
+- [x] Add leakage-aware rolling neutral pace features.
+- [x] Compare neutral pace against EPA-only and existing feature groups.
+- [x] Preserve the full 2016–2025 experiment outputs.
+
+Result: neutral pace did not improve walk-forward log loss or Brier score, so the
+8-game EPA-only model remains selected. See `artifacts/model/ablations/report.md`.
+
 ## Step 6: Recruiter packaging
 
 - [x] Add a Mermaid architecture and data-flow diagram.

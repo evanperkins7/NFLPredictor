@@ -8,6 +8,8 @@ prediction paths share the same leakage controls.
 flowchart LR
     A["nflverse team stats"] --> C["Data boundary"]
     B["nflverse schedules"] --> C
+    N["nflverse play-by-play"] --> P["Neutral-play filter"]
+    P --> C
     C --> D["Leakage-aware feature builder"]
     D --> E["Completed historical rows"]
     D --> F["Upcoming-game rows"]
