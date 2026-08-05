@@ -48,3 +48,6 @@ that a simple model can beat the market.
   combined offense/defense EPA. The baseline derives offense from those fields and
   derives defense from opponent offense; this assumption must be documented and
   validated against play-by-play before treating it as a final metric.
+- Step 4 ablations select an 8-game EPA-only configuration by walk-forward log loss and
+  Brier score. The 5-game EPA-only configuration has the highest walk-forward accuracy
+  and remains a documented alternative.
