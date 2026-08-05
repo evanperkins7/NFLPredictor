@@ -6,9 +6,10 @@ import argparse
 from pathlib import Path
 
 from nfl_predictor.ablations import run_ablations
-from nfl_predictor.data import load_nflverse_data
+from nfl_predictor.data import load_nflverse_data, load_nflverse_pbp
 from nfl_predictor.features import build_game_features
 from nfl_predictor.model import FEATURE_GROUPS
+from nfl_predictor.neutral import build_neutral_pace
 
 
 def main() -> None:
@@ -27,12 +28,13 @@ def main() -> None:
     args = parser.parse_args()
     seasons = list(range(args.start_season, args.end_season + 1))
     team_stats, schedule = load_nflverse_data(seasons)
+    neutral_pace = build_neutral_pace(load_nflverse_pbp(seasons))
 
     feature_tables = {
-        "expanding": build_game_features(team_stats, schedule),
-        "3": build_game_features(team_stats, schedule, rolling_window=3),
-        "5": build_game_features(team_stats, schedule, rolling_window=5),
-        "8": build_game_features(team_stats, schedule, rolling_window=8),
+        "expanding": build_game_features(team_stats, schedule, neutral_pace=neutral_pace),
+        "3": build_game_features(team_stats, schedule, rolling_window=3, neutral_pace=neutral_pace),
+        "5": build_game_features(team_stats, schedule, rolling_window=5, neutral_pace=neutral_pace),
+        "8": build_game_features(team_stats, schedule, rolling_window=8, neutral_pace=neutral_pace),
     }
     season_results, summary_results = run_ablations(
         feature_tables,
