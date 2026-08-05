@@ -57,6 +57,17 @@ model or feature-engineering logic. The app opens in read-only artifact mode by 
 enable local refreshes explicitly with `$env:NFL_ENABLE_REFRESH = "true"` before
 starting Streamlit.
 
+## Publishing the live weekly predictions
+
+`.github/workflows/publish-weekly-predictions.yml` publishes the artifact files that the
+deployed dashboard reads. It runs each Tuesday from September through January, chooses
+the earliest unplayed regular-season week, and commits only that week's CSV, chart, and
+report. Streamlit Community Cloud then redeploys from the new commit.
+
+To publish a specific week immediately, open **Actions → Publish weekly predictions →
+Run workflow** in GitHub and enter the season and week. The workflow intentionally
+force-adds only its three generated files, keeping routine local prediction runs ignored.
+
 ## Streamlit Community Cloud deployment
 
 The project is prepared for Streamlit Community Cloud with `app.py` as the entrypoint,

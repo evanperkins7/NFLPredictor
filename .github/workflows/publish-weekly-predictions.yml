@@ -1,0 +1,81 @@
+name: Publish weekly predictions
+
+on:
+  workflow_dispatch:
+    inputs:
+      season:
+        description: NFL season to publish
+        required: true
+        type: number
+      week:
+        description: Regular-season week to publish
+        required: true
+        type: number
+  schedule:
+    # Tuesday afternoon UTC, after the previous week's games and data updates.
+    - cron: "0 15 * 1,9-12 2"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-weekly-predictions
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Select prediction week
+        id: target
+        env:
+          INPUT_SEASON: ${{ inputs.season }}
+          INPUT_WEEK: ${{ inputs.week }}
+        run: |
+          if [ -n "$INPUT_SEASON" ] && [ -n "$INPUT_WEEK" ]; then
+            echo "season=$INPUT_SEASON" >> "$GITHUB_OUTPUT"
+            echo "week=$INPUT_WEEK" >> "$GITHUB_OUTPUT"
+            echo "has_target=true" >> "$GITHUB_OUTPUT"
+          else
+            target="$(python scripts/next_prediction_week.py)"
+            if [ -z "$target" ]; then
+              echo "has_target=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            read -r season week <<< "$target"
+            echo "season=$season" >> "$GITHUB_OUTPUT"
+            echo "week=$week" >> "$GITHUB_OUTPUT"
+            echo "has_target=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate predictions
+        if: steps.target.outputs.has_target == 'true'
+        run: python scripts/predict_week.py --season "${{ steps.target.outputs.season }}" --week "${{ steps.target.outputs.week }}"
+
+      - name: Commit and push artifacts
+        if: steps.target.outputs.has_target == 'true'
+        env:
+          SEASON: ${{ steps.target.outputs.season }}
+          WEEK: ${{ steps.target.outputs.week }}
+        run: |
+          git add -f "artifacts/predictions/predictions_${SEASON}_week_${WEEK}.csv"
+          git add -f "artifacts/predictions/predictions_${SEASON}_week_${WEEK}.md"
+          git add -f "artifacts/predictions/predictions_${SEASON}_week_${WEEK}.png"
+          if git diff --cached --quiet; then
+            echo "Prediction artifacts are already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: publish ${SEASON} week ${WEEK} predictions"
+          git push
