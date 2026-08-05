@@ -42,3 +42,11 @@ on walk-forward log loss and Brier score. See `artifacts/model/ablations/report.
 
 Result: the workflow generated 16 predictions successfully. See
 `artifacts/predictions/predictions_2026_week_1.csv` and the adjacent chart/report.
+
+## Step 6: Recruiter packaging
+
+- [x] Add a Mermaid architecture and data-flow diagram.
+- [x] Add a feature data dictionary.
+- [x] Add a model card with metrics, leakage evidence, and limitations.
+- [x] Add a recruiter-oriented case study with linked evidence.
+- [x] Link the package from the README and verify the documentation claims.

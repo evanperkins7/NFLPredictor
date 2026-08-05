@@ -21,8 +21,8 @@ the wrong column.
 ## Setup
 
 ```powershell
-py -m pip install -e ".[dev]"
-pytest
+.\.venv\Scripts\python.exe -m pip install -e ".[dev]"
+.\.venv\Scripts\python.exe -m pytest
 ```
 
 The project includes a CLI that downloads seasons, materializes a training table, fits
@@ -41,6 +41,13 @@ The command downloads the previous ten completed seasons plus the target schedul
 writes a CSV, probability chart, and Markdown report under `artifacts/predictions/`.
 The output probabilities are estimates, and confidence tiers are communication aids,
 not guarantees.
+
+## Project documentation
+
+- [Architecture](docs/architecture.md)
+- [Data dictionary](docs/data-dictionary.md)
+- [Model card](docs/model-card.md)
+- [Recruiter case study](docs/case-study.md)
 
 ## Data and modeling notes
 
