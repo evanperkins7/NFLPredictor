@@ -66,7 +66,9 @@ def _data():
 
 def test_weekly_predictions_produce_probability_and_confidence_outputs():
     stats, historical, target = _data()
-    predictions, _ = generate_weekly_predictions(stats, historical, target)
+    predictions, _ = generate_weekly_predictions(
+        stats, historical, target, calibration_method="raw"
+    )
     assert len(predictions) == 1
     assert 0 <= predictions.iloc[0]["home_win_probability"] <= 1
     assert predictions.iloc[0]["predicted_winner"] in {"A", "B"}

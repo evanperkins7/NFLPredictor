@@ -103,6 +103,39 @@ def fit_probability_calibrator(
     return lambda values: pd.Series(calibrator.predict(_clip(values)), index=values.index)
 
 
+def fit_calibrated_model(
+    data: pd.DataFrame,
+    feature_columns: list[str],
+    method: str = "sigmoid",
+    calibration_seasons: int = 1,
+) -> tuple[object, Callable[[pd.Series], pd.Series]]:
+    """Fit a production model and an optional calibration mapping from prior seasons."""
+    if method == "raw":
+        return fit_model(data, feature_columns), fit_probability_calibrator(
+            "raw", pd.Series(dtype=float), pd.Series(dtype=int)
+        )
+    model_data, calibration_data = calibration_split(data, calibration_seasons)
+    model = fit_model(model_data, feature_columns)
+    calibration_probabilities = pd.Series(
+        model.predict_proba(calibration_data[feature_columns])[:, 1], index=calibration_data.index
+    )
+    calibrator = fit_probability_calibrator(
+        method, calibration_probabilities, calibration_data["home_win"].astype(int)
+    )
+    return model, calibrator
+
+
+def calibrated_probabilities(
+    model: object,
+    calibrator: Callable[[pd.Series], pd.Series],
+    games: pd.DataFrame,
+    feature_columns: list[str],
+) -> pd.Series:
+    """Apply a fitted model and its calibration mapping to game features."""
+    raw = pd.Series(model.predict_proba(games[feature_columns])[:, 1], index=games.index)
+    return calibrator(raw)
+
+
 def _predict_split(
     train: pd.DataFrame,
     test: pd.DataFrame,
@@ -110,21 +143,12 @@ def _predict_split(
     method: str,
     calibration_seasons: int,
 ) -> tuple[pd.Series, pd.Series]:
-    if method == "raw":
-        model = fit_model(train, feature_columns)
-        return test["home_win"].astype(int), pd.Series(
-            model.predict_proba(test[feature_columns])[:, 1], index=test.index
-        )
-    model_train, calibration_data = calibration_split(train, calibration_seasons)
-    model = fit_model(model_train, feature_columns)
-    calibration_probabilities = pd.Series(
-        model.predict_proba(calibration_data[feature_columns])[:, 1], index=calibration_data.index
+    model, calibrator = fit_calibrated_model(
+        train, feature_columns, method, calibration_seasons
     )
-    calibrator = fit_probability_calibrator(
-        method, calibration_probabilities, calibration_data["home_win"].astype(int)
+    return test["home_win"].astype(int), calibrated_probabilities(
+        model, calibrator, test, feature_columns
     )
-    test_probabilities = pd.Series(model.predict_proba(test[feature_columns])[:, 1], index=test.index)
-    return test["home_win"].astype(int), calibrator(test_probabilities)
 
 
 def run_calibration_experiment(

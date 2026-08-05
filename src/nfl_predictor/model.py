@@ -83,13 +83,16 @@ def add_prediction_labels(
     games: pd.DataFrame,
     model: Pipeline,
     feature_columns: list[str] | None = None,
+    probabilities: pd.Series | None = None,
 ) -> pd.DataFrame:
     """Add interpretable probability, winner, and confidence outputs to game rows."""
     selected_features = feature_columns or FEATURE_COLUMNS
     output = games.copy()
-    home_probability = pd.Series(
-        model.predict_proba(output[selected_features])[:, 1], index=output.index
-    )
+    home_probability = probabilities
+    if home_probability is None:
+        home_probability = pd.Series(
+            model.predict_proba(output[selected_features])[:, 1], index=output.index
+        )
     confidence = home_probability.where(home_probability >= 0.5, 1 - home_probability)
     output["home_win_probability"] = home_probability
     output["predicted_winner"] = output.apply(

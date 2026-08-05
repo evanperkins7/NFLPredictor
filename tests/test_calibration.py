@@ -1,8 +1,10 @@
 import pandas as pd
 
 from nfl_predictor.calibration import (
+    calibrated_probabilities,
     calibration_metrics,
     calibration_split,
+    fit_calibrated_model,
     reliability_table,
     run_calibration_experiment,
 )
@@ -45,3 +47,11 @@ def test_calibration_experiment_is_chronological():
     assert set(season_results["method"]) == {"raw", "sigmoid", "isotonic"}
     assert set(summary_results["evaluation"]) == {"walk_forward", "fixed_holdout"}
     assert set(reliability["method"]) == {"raw", "sigmoid", "isotonic"}
+
+
+def test_sigmoid_model_emits_calibrated_probabilities():
+    data = _features()
+    feature_columns = ["offensive_epa_diff", "defensive_epa_diff"]
+    model, calibrator = fit_calibrated_model(data, feature_columns, method="sigmoid")
+    probabilities = calibrated_probabilities(model, calibrator, data.tail(3), feature_columns)
+    assert probabilities.between(0, 1).all()
