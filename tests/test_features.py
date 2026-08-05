@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from nfl_predictor.features import FEATURE_COLUMNS, build_game_features
+from nfl_predictor.features import FEATURE_COLUMNS, build_game_features, build_upcoming_features
 
 
 def _fixtures():
@@ -61,3 +61,24 @@ def test_rolling_window_must_be_positive():
     stats, schedule = _fixtures()
     with pytest.raises(ValueError, match="rolling_window must be positive"):
         build_game_features(stats, schedule, rolling_window=0)
+
+
+def test_upcoming_features_use_completed_history_without_target_labels():
+    stats, schedule = _fixtures()
+    upcoming_schedule = pd.DataFrame(
+        {
+            "game_id": ["2024_03_A_B"],
+            "season": [2024],
+            "week": [3],
+            "game_type": ["REG"],
+            "gameday": ["2024-09-15"],
+            "home_team": ["B"],
+            "away_team": ["A"],
+            "home_score": [float("nan")],
+            "away_score": [float("nan")],
+        }
+    )
+    upcoming = build_upcoming_features(stats, pd.concat([schedule, upcoming_schedule]))
+    assert len(upcoming) == 1
+    assert {"home_win", "home_margin"}.isdisjoint(upcoming.columns)
+    assert upcoming.iloc[0]["game_id"] == "2024_03_A_B"

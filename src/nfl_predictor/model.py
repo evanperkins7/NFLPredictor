@@ -29,6 +29,14 @@ def make_model() -> Pipeline:
     )
 
 
+def fit_model(data: pd.DataFrame, feature_columns: list[str] | None = None) -> Pipeline:
+    """Fit a model on completed feature rows using the requested feature columns."""
+    selected_features = feature_columns or FEATURE_COLUMNS
+    model = make_model()
+    model.fit(data[selected_features], data["home_win"])
+    return model
+
+
 def time_split(data: pd.DataFrame, test_seasons: int = 2) -> tuple[pd.DataFrame, pd.DataFrame]:
     seasons = sorted(data["season"].unique())
     if len(seasons) <= test_seasons:
@@ -44,8 +52,7 @@ def fit_and_evaluate(
 ) -> tuple[Pipeline, dict[str, float]]:
     selected_features = feature_columns or FEATURE_COLUMNS
     train, test = time_split(data, test_seasons=test_seasons)
-    model = make_model()
-    model.fit(train[selected_features], train["home_win"])
+    model = fit_model(train, selected_features)
     probabilities = model.predict_proba(test[selected_features])[:, 1]
     predictions = (probabilities >= 0.5).astype(int)
     train_home_win_rate = float(train["home_win"].mean())
@@ -67,11 +74,16 @@ def fit_and_evaluate(
     return model, metrics
 
 
-def add_prediction_labels(games: pd.DataFrame, model: Pipeline) -> pd.DataFrame:
+def add_prediction_labels(
+    games: pd.DataFrame,
+    model: Pipeline,
+    feature_columns: list[str] | None = None,
+) -> pd.DataFrame:
     """Add interpretable probability, winner, and confidence outputs to game rows."""
+    selected_features = feature_columns or FEATURE_COLUMNS
     output = games.copy()
     home_probability = pd.Series(
-        model.predict_proba(output[FEATURE_COLUMNS])[:, 1], index=output.index
+        model.predict_proba(output[selected_features])[:, 1], index=output.index
     )
     confidence = home_probability.where(home_probability >= 0.5, 1 - home_probability)
     output["home_win_probability"] = home_probability

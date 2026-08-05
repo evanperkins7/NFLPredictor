@@ -22,3 +22,9 @@ def load_nflverse_data(seasons: list[int]) -> tuple[pd.DataFrame, pd.DataFrame]:
     schedule = nfl.load_schedules(seasons=seasons).to_pandas()
     return team_stats, schedule
 
+
+def load_nflverse_schedules(seasons: list[int]) -> pd.DataFrame:
+    """Download schedules without requiring team statistics for those seasons."""
+    import nflreadpy as nfl
+
+    return nfl.load_schedules(seasons=seasons).to_pandas()

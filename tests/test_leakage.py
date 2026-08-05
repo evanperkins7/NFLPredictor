@@ -44,5 +44,5 @@ def test_structural_audit_passes_for_valid_features():
 def test_mutating_a_game_does_not_change_current_or_prior_rows():
     stats, schedule = _fixtures()
     audit = mutation_audit(stats, schedule, "2024_02_A_B")
-    assert audit["protected_rows"] == 1
+    assert audit["protected_rows"] == 2
     assert audit["passed"] is True

@@ -81,6 +81,7 @@ def build_game_features(
     team_stats: pd.DataFrame,
     schedule: pd.DataFrame,
     rolling_window: int | None = None,
+    include_unplayed: bool = False,
 ) -> pd.DataFrame:
     """Return one row per game using only information available before kickoff.
 
@@ -100,9 +101,9 @@ def build_game_features(
 
     date_col = _date_column(schedule)
     schedule["game_date"] = pd.to_datetime(schedule[date_col], errors="coerce")
-    schedule = schedule[
-        (schedule["game_type"] == "REG") & schedule["home_score"].notna() & schedule["away_score"].notna()
-    ].copy()
+    schedule = schedule[schedule["game_type"] == "REG"].copy()
+    if not include_unplayed:
+        schedule = schedule[schedule["home_score"].notna() & schedule["away_score"].notna()].copy()
     schedule = schedule.sort_values(["season", "game_date", "game_id"])
 
     stats = stats.merge(schedule[["game_id", "game_date"]], on="game_id", how="inner")
@@ -122,6 +123,9 @@ def build_game_features(
         stats[f"rolling_{name}"] = rolling_values
 
     game_dates = schedule[["game_id", "home_team", "away_team", "game_date"]].copy()
+    latest_team_stats = stats.sort_values(["team", "game_date", "game_id"]).drop_duplicates(
+        "team", keep="last"
+    )
     for side in ("home", "away"):
         side_stats = stats.rename(columns={"team": f"{side}_team"})
         side_stats = side_stats[
@@ -134,6 +138,21 @@ def build_game_features(
             }
         )
         game_dates = game_dates.merge(side_stats, on=["game_id", f"{side}_team"], how="left")
+        latest_side_stats = latest_team_stats.rename(columns={"team": f"{side}_team"})[
+            [f"{side}_team", "rolling_offensive_epa", "rolling_defensive_epa", "rolling_pace"]
+        ].rename(
+            columns={
+                "rolling_offensive_epa": f"latest_{side}_offensive_epa",
+                "rolling_defensive_epa": f"latest_{side}_defensive_epa",
+                "rolling_pace": f"latest_{side}_pace",
+            }
+        )
+        game_dates = game_dates.merge(latest_side_stats, on=f"{side}_team", how="left")
+        for metric in ("offensive_epa", "defensive_epa", "pace"):
+            current_column = f"{side}_{metric}"
+            latest_column = f"latest_{side}_{metric}"
+            game_dates[current_column] = game_dates[current_column].fillna(game_dates[latest_column])
+            game_dates = game_dates.drop(columns=latest_column)
 
     appearances = pd.concat(
         [
@@ -168,10 +187,28 @@ def build_game_features(
         on="game_id",
         how="left",
     )
-    result["home_win"] = (result["home_score"] > result["away_score"]).astype(int)
+    result["home_win"] = (result["home_score"] > result["away_score"]).where(
+        result["home_score"].notna() & result["away_score"].notna()
+    )
     result["home_margin"] = result["home_score"] - result["away_score"]
     result["offensive_epa_diff"] = result["home_offensive_epa"] - result["away_offensive_epa"]
     result["defensive_epa_diff"] = result["home_defensive_epa"] - result["away_defensive_epa"]
     result["pace_diff"] = result["home_pace"] - result["away_pace"]
     result["rest_days_diff"] = result["home_rest_days"] - result["away_rest_days"]
     return result.dropna(subset=FEATURE_COLUMNS).sort_values(["season", "week", "game_id"])
+
+
+def build_upcoming_features(
+    team_stats: pd.DataFrame,
+    schedule: pd.DataFrame,
+    rolling_window: int | None = None,
+) -> pd.DataFrame:
+    """Build pre-game features for schedule rows without completed scores."""
+    features = build_game_features(
+        team_stats,
+        schedule,
+        rolling_window=rolling_window,
+        include_unplayed=True,
+    )
+    upcoming = features[features["home_win"].isna()].copy()
+    return upcoming.drop(columns=["home_win", "home_margin"])
