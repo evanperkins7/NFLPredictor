@@ -1,0 +1,17 @@
+{
+  "structural": {
+    "rows": 2547,
+    "missing_columns": [],
+    "duplicate_game_rows": 0,
+    "missing_feature_values": 0,
+    "invalid_team_matchups": 0,
+    "invalid_week_values": 0,
+    "passed": true
+  },
+  "adversarial": {
+    "status": "not_run",
+    "reason": "Raw nflverse download was skipped."
+  },
+  "complete": false,
+  "passed": true
+}
