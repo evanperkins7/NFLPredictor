@@ -25,8 +25,22 @@ py -m pip install -e ".[dev]"
 pytest
 ```
 
-The next runnable milestone will add a CLI that downloads seasons, materializes a
-training table, fits the model, and writes evaluation artifacts under `artifacts/`.
+The project includes a CLI that downloads seasons, materializes a training table, fits
+the selected model, and writes prediction artifacts under `artifacts/`.
+
+## Weekly predictions
+
+Generate predictions for an upcoming season or week using the selected 8-game EPA-only
+model:
+
+```powershell
+py scripts/predict_week.py --season 2026 --week 1
+```
+
+The command downloads the previous ten completed seasons plus the target schedule and
+writes a CSV, probability chart, and Markdown report under `artifacts/predictions/`.
+The output probabilities are estimates, and confidence tiers are communication aids,
+not guarantees.
 
 ## Data and modeling notes
 
