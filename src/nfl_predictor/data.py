@@ -28,3 +28,10 @@ def load_nflverse_schedules(seasons: list[int]) -> pd.DataFrame:
     import nflreadpy as nfl
 
     return nfl.load_schedules(seasons=seasons).to_pandas()
+
+
+def load_nflverse_pbp(seasons: list[int]) -> pd.DataFrame:
+    """Download play-by-play data and convert it to pandas."""
+    import nflreadpy as nfl
+
+    return nfl.load_pbp(seasons=seasons).to_pandas()
