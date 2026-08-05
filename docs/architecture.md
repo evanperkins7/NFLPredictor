@@ -20,6 +20,7 @@ flowchart LR
     F --> G
     H --> I["Predicted winner and confidence tier"]
     I --> J["CSV, chart, and Markdown report"]
+    J --> U["Local Streamlit dashboard"]
     E --> K["Walk-forward evaluation"]
     K --> L["Metrics and ablation artifacts"]
 ```

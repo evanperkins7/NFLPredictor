@@ -53,4 +53,5 @@ research but is excluded from the selected production model. A time-aware calibr
 experiment then selected sigmoid calibration by walk-forward probability metrics, while
 keeping the confidence-tier thresholds unchanged because the tier evidence was not yet
 stable enough. The next improvement is an optional Streamlit presentation layer over
-the same pipeline.
+the same pipeline. That local dashboard now provides recruiter-friendly prediction,
+evaluation, and trust views while preserving the CLI as the single prediction path.

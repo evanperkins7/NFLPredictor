@@ -65,6 +65,17 @@ Result: neutral pace did not improve walk-forward log loss or Brier score, so th
 Result: sigmoid calibration slightly improves the primary walk-forward probability
 metrics; see `artifacts/model/calibration/report.md`.
 
+## Step 9: Local Streamlit demo
+
+- [x] Add a polished, artifact-first local dashboard.
+- [x] Show weekly predictions, calibration evidence, ablations, and leakage status.
+- [x] Add an explicit refresh action that delegates to the verified weekly CLI.
+- [x] Add dashboard artifact-loading tests and a Streamlit smoke test.
+- [x] Document local setup and usage.
+
+Result: `app.py` is the recruiter-facing local demo. Public deployment remains a
+follow-up after standalone repository migration.
+
 ## Step 6: Recruiter packaging
 
 - [x] Add a Mermaid architecture and data-flow diagram.

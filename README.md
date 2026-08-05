@@ -42,6 +42,19 @@ writes a CSV, probability chart, and Markdown report under `artifacts/prediction
 The output probabilities are estimates, and confidence tiers are communication aids,
 not guarantees.
 
+## Local dashboard
+
+Run the recruiter-facing Streamlit demo with saved artifacts by default:
+
+```powershell
+.\.venv\Scripts\python.exe -m streamlit run app.py
+```
+
+The dashboard includes weekly predictions, walk-forward calibration evidence, feature
+ablations, leakage-audit status, and links to the supporting documentation. Its refresh
+button runs the existing weekly CLI explicitly, so the interface does not duplicate
+model or feature-engineering logic.
+
 ## Project documentation
 
 - [Architecture](docs/architecture.md)

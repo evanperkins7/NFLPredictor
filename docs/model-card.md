@@ -6,6 +6,10 @@ The selected model is a sigmoid-calibrated, standardized logistic-regression cla
 using each team’s prior eight-game offensive and defensive EPA differentials. It predicts
 the probability of a home-team win and is used by `scripts/predict_week.py`.
 
+The local Streamlit dashboard in `app.py` displays saved weekly artifacts and the
+supporting evaluation evidence. Its refresh action delegates to the same CLI rather
+than reimplementing the prediction pipeline.
+
 ## Intended use
 
 This model is intended for a reproducible engineering demonstration of time-aware
