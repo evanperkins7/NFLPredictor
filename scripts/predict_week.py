@@ -76,7 +76,7 @@ def main() -> None:
             [
                 f"# NFL predictions: {args.season} {week_label}",
                 "",
-                "- Model: logistic regression with standardized 8-game EPA history.",
+                "- Model: sigmoid-calibrated logistic regression with standardized 8-game EPA history.",
                 f"- Games: {len(predictions)}",
                 f"- CSV: `{csv_path}`",
                 f"- Chart: `{chart_path}`",
