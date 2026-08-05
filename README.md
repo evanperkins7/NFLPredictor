@@ -34,7 +34,7 @@ Generate predictions for an upcoming season or week using the selected 8-game EP
 model:
 
 ```powershell
-py scripts/predict_week.py --season 2026 --week 1
+.\.venv\Scripts\python.exe scripts/predict_week.py --season 2026 --week 1
 ```
 
 The command downloads the previous ten completed seasons plus the target schedule and
