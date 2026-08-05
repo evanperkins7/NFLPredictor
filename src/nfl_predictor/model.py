@@ -8,16 +8,21 @@ from sklearn.metrics import accuracy_score, brier_score_loss, log_loss
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 
-from .features import FEATURE_COLUMNS
+from .features import FEATURE_COLUMNS, NEUTRAL_PACE_FEATURE
 
+EPA_FEATURES = ["offensive_epa_diff", "defensive_epa_diff"]
 FEATURE_GROUPS = {
-    "epa": ["offensive_epa_diff", "defensive_epa_diff"],
-    "epa_rest": ["offensive_epa_diff", "defensive_epa_diff", "rest_days_diff"],
-    "epa_pace": ["offensive_epa_diff", "defensive_epa_diff", "pace_diff"],
+    "epa": EPA_FEATURES,
+    "epa_rest": [*EPA_FEATURES, "rest_days_diff"],
+    "epa_pace": [*EPA_FEATURES, "pace_diff"],
+    "epa_neutral_pace": [*EPA_FEATURES, NEUTRAL_PACE_FEATURE],
+    "epa_rest_neutral_pace": [*EPA_FEATURES, "rest_days_diff", NEUTRAL_PACE_FEATURE],
     "all": FEATURE_COLUMNS,
+    "all_neutral_pace": [*FEATURE_COLUMNS, NEUTRAL_PACE_FEATURE],
     "rest": ["rest_days_diff"],
     "pace": ["pace_diff"],
 }
+DEFAULT_FEATURE_GROUPS = ("all", "epa", "epa_pace", "epa_rest", "pace", "rest")
 
 
 def make_model() -> Pipeline:

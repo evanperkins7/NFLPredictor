@@ -82,3 +82,17 @@ def test_upcoming_features_use_completed_history_without_target_labels():
     assert len(upcoming) == 1
     assert {"home_win", "home_margin"}.isdisjoint(upcoming.columns)
     assert upcoming.iloc[0]["game_id"] == "2024_03_A_B"
+
+
+def test_neutral_pace_is_shifted_before_being_used():
+    stats, schedule = _fixtures()
+    neutral_pace = pd.DataFrame(
+        {
+            "game_id": ["2024_01_A_B", "2024_01_A_B", "2024_02_A_B", "2024_02_A_B"],
+            "team": ["A", "B", "A", "B"],
+            "neutral_pace": [30, 20, 90, 80],
+        }
+    )
+    result = build_game_features(stats, schedule, neutral_pace=neutral_pace)
+    week_two = result.loc[result["week"] == 2].iloc[0]
+    assert week_two["neutral_pace_diff"] == pytest.approx(10.0)

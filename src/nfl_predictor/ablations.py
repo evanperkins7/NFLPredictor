@@ -7,7 +7,7 @@ from collections.abc import Iterable, Iterator
 import pandas as pd
 from sklearn.metrics import accuracy_score, brier_score_loss, log_loss
 
-from .model import FEATURE_GROUPS, make_model
+from .model import DEFAULT_FEATURE_GROUPS, FEATURE_GROUPS, make_model
 
 
 def walk_forward_splits(
@@ -101,15 +101,16 @@ def evaluate_feature_table(
 
 def run_ablations(
     feature_tables: dict[str, pd.DataFrame],
-    feature_groups: Iterable[str] = FEATURE_GROUPS,
+    feature_groups: Iterable[str] | None = None,
     min_train_seasons: int = 4,
     test_seasons: int = 2,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Run all requested feature-group experiments across rolling windows."""
     all_season_rows: list[pd.DataFrame] = []
     all_summary_rows: list[pd.DataFrame] = []
+    selected_groups = feature_groups or DEFAULT_FEATURE_GROUPS
     for window, data in feature_tables.items():
-        for feature_group in feature_groups:
+        for feature_group in selected_groups:
             season_results, summary_results = evaluate_feature_table(
                 data,
                 feature_group,

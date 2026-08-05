@@ -6,13 +6,13 @@ from collections.abc import Iterable
 
 import pandas as pd
 
-
 FEATURE_COLUMNS = [
     "offensive_epa_diff",
     "defensive_epa_diff",
     "pace_diff",
     "rest_days_diff",
 ]
+NEUTRAL_PACE_FEATURE = "neutral_pace_diff"
 
 
 def _find_column(frame: pd.DataFrame, candidates: Iterable[str], label: str) -> str:
@@ -82,6 +82,7 @@ def build_game_features(
     schedule: pd.DataFrame,
     rolling_window: int | None = None,
     include_unplayed: bool = False,
+    neutral_pace: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Return one row per game using only information available before kickoff.
 
@@ -93,6 +94,21 @@ def build_game_features(
         raise ValueError("rolling_window must be positive or None")
 
     stats = _prepare_team_stats(team_stats)
+    metric_names = ["offensive_epa", "defensive_epa", "pace"]
+    if neutral_pace is not None:
+        required_pace_columns = {"game_id", "team", "neutral_pace"}
+        missing_pace_columns = sorted(required_pace_columns - set(neutral_pace.columns))
+        if missing_pace_columns:
+            raise ValueError(
+                f"Neutral pace data is missing required columns: {missing_pace_columns}"
+            )
+        stats = stats.merge(
+            neutral_pace[["game_id", "team", "neutral_pace"]],
+            on=["game_id", "team"],
+            how="left",
+        )
+        stats["neutral_pace"] = stats["neutral_pace"].fillna(0)
+        metric_names.append("neutral_pace")
     schedule = schedule.copy()
     required = {"season", "week", "game_id", "home_team", "away_team", "home_score", "away_score"}
     missing = required - set(schedule.columns)
@@ -108,8 +124,7 @@ def build_game_features(
 
     stats = stats.merge(schedule[["game_id", "game_date"]], on="game_id", how="inner")
     stats = stats.sort_values(["team", "game_date", "game_id"])
-    stat_names = ["offensive_epa", "defensive_epa", "pace"]
-    for name in stat_names:
+    for name in metric_names:
         stats[f"prior_{name}"] = stats.groupby("team", sort=False)[name].shift(1)
         prior_values = stats.groupby("team", sort=False)[f"prior_{name}"]
         if rolling_window is None:
@@ -129,26 +144,28 @@ def build_game_features(
     for side in ("home", "away"):
         side_stats = stats.rename(columns={"team": f"{side}_team"})
         side_stats = side_stats[
-            ["game_id", f"{side}_team", "rolling_offensive_epa", "rolling_defensive_epa", "rolling_pace"]
+            [
+                "game_id",
+                f"{side}_team",
+                *[f"rolling_{name}" for name in metric_names],
+            ]
         ].rename(
             columns={
-                "rolling_offensive_epa": f"{side}_offensive_epa",
-                "rolling_defensive_epa": f"{side}_defensive_epa",
-                "rolling_pace": f"{side}_pace",
+                f"rolling_{name}": f"{side}_{name}"
+                for name in metric_names
             }
         )
         game_dates = game_dates.merge(side_stats, on=["game_id", f"{side}_team"], how="left")
         latest_side_stats = latest_team_stats.rename(columns={"team": f"{side}_team"})[
-            [f"{side}_team", "rolling_offensive_epa", "rolling_defensive_epa", "rolling_pace"]
+            [f"{side}_team", *[f"rolling_{name}" for name in metric_names]]
         ].rename(
             columns={
-                "rolling_offensive_epa": f"latest_{side}_offensive_epa",
-                "rolling_defensive_epa": f"latest_{side}_defensive_epa",
-                "rolling_pace": f"latest_{side}_pace",
+                f"rolling_{name}": f"latest_{side}_{name}"
+                for name in metric_names
             }
         )
         game_dates = game_dates.merge(latest_side_stats, on=f"{side}_team", how="left")
-        for metric in ("offensive_epa", "defensive_epa", "pace"):
+        for metric in metric_names:
             current_column = f"{side}_{metric}"
             latest_column = f"latest_{side}_{metric}"
             game_dates[current_column] = game_dates[current_column].fillna(game_dates[latest_column])
@@ -195,6 +212,10 @@ def build_game_features(
     result["defensive_epa_diff"] = result["home_defensive_epa"] - result["away_defensive_epa"]
     result["pace_diff"] = result["home_pace"] - result["away_pace"]
     result["rest_days_diff"] = result["home_rest_days"] - result["away_rest_days"]
+    if neutral_pace is not None:
+        result[NEUTRAL_PACE_FEATURE] = (
+            result["home_neutral_pace"] - result["away_neutral_pace"]
+        )
     return result.dropna(subset=FEATURE_COLUMNS).sort_values(["season", "week", "game_id"])
 
 
@@ -202,6 +223,7 @@ def build_upcoming_features(
     team_stats: pd.DataFrame,
     schedule: pd.DataFrame,
     rolling_window: int | None = None,
+    neutral_pace: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Build pre-game features for schedule rows without completed scores."""
     features = build_game_features(
@@ -209,6 +231,7 @@ def build_upcoming_features(
         schedule,
         rolling_window=rolling_window,
         include_unplayed=True,
+        neutral_pace=neutral_pace,
     )
     upcoming = features[features["home_win"].isna()].copy()
     return upcoming.drop(columns=["home_win", "home_margin"])
