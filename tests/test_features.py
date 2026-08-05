@@ -48,3 +48,16 @@ def test_missing_schema_is_explicit():
     stats = stats.drop(columns=["off_epa", "def_epa", "plays"])
     with pytest.raises(ValueError, match="passing EPA"):
         build_game_features(stats, schedule)
+
+
+def test_rolling_window_uses_only_the_requested_prior_games():
+    stats, schedule = _fixtures()
+    result = build_game_features(stats, schedule, rolling_window=1)
+    week_two = result.loc[result["week"] == 2].iloc[0]
+    assert week_two["offensive_epa_diff"] == pytest.approx(2.0)
+
+
+def test_rolling_window_must_be_positive():
+    stats, schedule = _fixtures()
+    with pytest.raises(ValueError, match="rolling_window must be positive"):
+        build_game_features(stats, schedule, rolling_window=0)

@@ -77,13 +77,20 @@ def _prepare_team_stats(team_stats: pd.DataFrame) -> pd.DataFrame:
     ]
 
 
-def build_game_features(team_stats: pd.DataFrame, schedule: pd.DataFrame) -> pd.DataFrame:
+def build_game_features(
+    team_stats: pd.DataFrame,
+    schedule: pd.DataFrame,
+    rolling_window: int | None = None,
+) -> pd.DataFrame:
     """Return one row per game using only information available before kickoff.
 
     The weekly team statistics are shifted by one game within each team before rolling
     aggregation. This is the core leakage guard: a game's own stats cannot become an
     input to its prediction row.
     """
+    if rolling_window is not None and rolling_window < 1:
+        raise ValueError("rolling_window must be positive or None")
+
     stats = _prepare_team_stats(team_stats)
     schedule = schedule.copy()
     required = {"season", "week", "game_id", "home_team", "away_team", "home_score", "away_score"}
@@ -103,9 +110,16 @@ def build_game_features(team_stats: pd.DataFrame, schedule: pd.DataFrame) -> pd.
     stat_names = ["offensive_epa", "defensive_epa", "pace"]
     for name in stat_names:
         stats[f"prior_{name}"] = stats.groupby("team", sort=False)[name].shift(1)
-        stats[f"rolling_{name}"] = stats.groupby("team", sort=False)[f"prior_{name}"].transform(
-            lambda series: series.expanding(min_periods=1).mean()
-        )
+        prior_values = stats.groupby("team", sort=False)[f"prior_{name}"]
+        if rolling_window is None:
+            rolling_values = prior_values.transform(
+                lambda series: series.expanding(min_periods=1).mean()
+            )
+        else:
+            rolling_values = prior_values.transform(
+                lambda series: series.rolling(rolling_window, min_periods=1).mean()
+            )
+        stats[f"rolling_{name}"] = rolling_values
 
     game_dates = schedule[["game_id", "home_team", "away_team", "game_date"]].copy()
     for side in ("home", "away"):

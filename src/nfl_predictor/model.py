@@ -10,6 +10,15 @@ from sklearn.preprocessing import StandardScaler
 
 from .features import FEATURE_COLUMNS
 
+FEATURE_GROUPS = {
+    "epa": ["offensive_epa_diff", "defensive_epa_diff"],
+    "epa_rest": ["offensive_epa_diff", "defensive_epa_diff", "rest_days_diff"],
+    "epa_pace": ["offensive_epa_diff", "defensive_epa_diff", "pace_diff"],
+    "all": FEATURE_COLUMNS,
+    "rest": ["rest_days_diff"],
+    "pace": ["pace_diff"],
+}
+
 
 def make_model() -> Pipeline:
     return Pipeline(
@@ -28,11 +37,16 @@ def time_split(data: pd.DataFrame, test_seasons: int = 2) -> tuple[pd.DataFrame,
     return data[data["season"] < cutoff].copy(), data[data["season"] >= cutoff].copy()
 
 
-def fit_and_evaluate(data: pd.DataFrame, test_seasons: int = 2) -> tuple[Pipeline, dict[str, float]]:
+def fit_and_evaluate(
+    data: pd.DataFrame,
+    test_seasons: int = 2,
+    feature_columns: list[str] | None = None,
+) -> tuple[Pipeline, dict[str, float]]:
+    selected_features = feature_columns or FEATURE_COLUMNS
     train, test = time_split(data, test_seasons=test_seasons)
     model = make_model()
-    model.fit(train[FEATURE_COLUMNS], train["home_win"])
-    probabilities = model.predict_proba(test[FEATURE_COLUMNS])[:, 1]
+    model.fit(train[selected_features], train["home_win"])
+    probabilities = model.predict_proba(test[selected_features])[:, 1]
     predictions = (probabilities >= 0.5).astype(int)
     train_home_win_rate = float(train["home_win"].mean())
     metrics = {
