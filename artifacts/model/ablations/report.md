@@ -19,16 +19,17 @@ The complete machine-readable outputs are `season_results.csv` and
 
 | Rolling window | Feature group | Accuracy | Log loss | Brier score |
 | --- | --- | ---: | ---: | ---: |
-| 8 | EPA | 62.1% | 0.645 | 0.227 |
-| 8 | EPA + pace | 62.0% | 0.646 | 0.227 |
-| 8 | EPA + rest | 62.0% | 0.646 | 0.227 |
-| 5 | EPA | **62.9%** | 0.650 | 0.229 |
-| expanding | all features | 58.2% | 0.671 | 0.238 |
+| 8 | EPA | 62.0% | **0.645** | **0.227** |
+| 8 | EPA + neutral pace | 61.7% | 0.645 | 0.227 |
+| 8 | EPA + pace | 62.1% | 0.645 | 0.227 |
+| 5 | EPA | **63.0%** | 0.650 | 0.229 |
+| expanding | all features | 58.3% | 0.671 | 0.238 |
 
 The 8-game EPA-only model is the recommended configuration for the next milestone
 because it has the best walk-forward log loss and Brier score. The 5-game EPA-only
 model has the best accuracy, so it should remain a documented alternative if the
-product later prioritizes winner classification over probability quality.
+product later prioritizes winner classification over probability quality. Adding
+neutral pace did not improve the selected model's probability quality.
 
 ## Findings
 
@@ -37,8 +38,8 @@ product later prioritizes winner classification over probability quality.
 2. A finite recent-history window is better than an expanding history for this data.
    The 8-game EPA model improves walk-forward log loss from 0.671 to 0.645 and Brier
    score from 0.238 to 0.227 compared with the current all-feature baseline.
-3. Adding the current pace proxy or rest differential does not improve the selected
-   8-game EPA model's probabilistic metrics.
+3. Adding neutral pace, the current pace proxy, or rest differential does not improve
+   the selected 8-game EPA model's probabilistic metrics.
 4. The fixed 2024–2025 holdout gives stronger results than the walk-forward aggregate,
    which is expected because it evaluates a different time slice. It remains a
    reference, not the ablation selection rule.
@@ -46,6 +47,9 @@ product later prioritizes winner classification over probability quality.
 ## Limitations
 
 - The pace feature is still a volume proxy, not neutral-situation tempo.
+- The neutral-situation pace feature uses an explicit first-three-quarters,
+  one-possession filter and was not retained because it did not improve validation
+  metrics.
 - The comparison tests several configurations without confidence intervals or a
   correction for multiple comparisons; the selected configuration should be treated
   as a transparent engineering choice, not proof of a universal optimum.
