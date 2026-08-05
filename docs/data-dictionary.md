@@ -38,13 +38,14 @@ retained because it did not improve walk-forward probability metrics.
 
 | Column | Meaning |
 | --- | --- |
-| `home_win_probability` | Estimated probability that the home team wins |
+| `home_win_probability` | Sigmoid-calibrated estimated probability that the home team wins |
 | `predicted_winner` | Team selected at the 0.5 probability threshold |
 | `confidence_tier` | `low`, `medium`, or `high` based on distance from 0.5 |
 
 Confidence tiers use these probability bands: low through 0.55, medium from above
 0.55 through 0.70, and high above 0.70. They are communication aids, not statistical
-guarantees.
+guarantees. The thresholds were retained after calibration evaluation because tier-level
+reliability was not stable enough to support evidence-based replacements.
 
 ## Missing data and cold starts
 

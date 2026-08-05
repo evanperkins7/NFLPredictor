@@ -54,6 +54,17 @@ Result: the workflow generated 16 predictions successfully. See
 Result: neutral pace did not improve walk-forward log loss or Brier score, so the
 8-game EPA-only model remains selected. See `artifacts/model/ablations/report.md`.
 
+## Step 8: Probability calibration
+
+- [x] Add time-aware reliability metrics and calibration candidates.
+- [x] Keep calibration data strictly before each outer test season.
+- [x] Compare raw, sigmoid, and isotonic probabilities over 2016–2025.
+- [x] Use sigmoid calibration for weekly predictions based on walk-forward evidence.
+- [x] Retain the existing confidence-tier thresholds pending stronger tier-level evidence.
+
+Result: sigmoid calibration slightly improves the primary walk-forward probability
+metrics; see `artifacts/model/calibration/report.md`.
+
 ## Step 6: Recruiter packaging
 
 - [x] Add a Mermaid architecture and data-flow diagram.

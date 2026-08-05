@@ -30,8 +30,8 @@ the selected model, and writes prediction artifacts under `artifacts/`.
 
 ## Weekly predictions
 
-Generate predictions for an upcoming season or week using the selected 8-game EPA-only
-model:
+Generate predictions for an upcoming season or week using the selected sigmoid-calibrated
+8-game EPA-only model:
 
 ```powershell
 .\.venv\Scripts\python.exe scripts/predict_week.py --season 2026 --week 1

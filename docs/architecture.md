@@ -14,6 +14,8 @@ flowchart LR
     D --> E["Completed historical rows"]
     D --> F["Upcoming-game rows"]
     E --> G["8-game EPA logistic regression"]
+    E --> M["Walk-forward calibration evaluation"]
+    M --> G
     G --> H["Win probabilities"]
     F --> G
     H --> I["Predicted winner and confidence tier"]

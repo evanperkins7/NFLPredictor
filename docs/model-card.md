@@ -2,9 +2,9 @@
 
 ## Model
 
-The selected model is a standardized logistic-regression classifier using each team’s
-prior eight-game offensive and defensive EPA differentials. It predicts the probability
-of a home-team win and is used by `scripts/predict_week.py`.
+The selected model is a sigmoid-calibrated, standardized logistic-regression classifier
+using each team’s prior eight-game offensive and defensive EPA differentials. It predicts
+the probability of a home-team win and is used by `scripts/predict_week.py`.
 
 ## Intended use
 
@@ -30,6 +30,11 @@ betting, or guaranteed decision-making advice.
 | Existing expanding all-feature baseline, walk-forward | 58.3% | 0.671 | 0.238 | 1,615 |
 | Existing expanding all-feature baseline, 2024–2025 reference | 59.6% | 0.663 | 0.235 | 544 |
 
+The calibration comparison selected sigmoid mapping by primary walk-forward metrics:
+log loss 0.644850, Brier score 0.226668, and expected calibration error 0.021376. The
+improvement over raw probabilities is small, and the fixed 2024–2025 reference does not
+replicate it; see [`calibration report`](../artifacts/model/calibration/report.md).
+
 The complete ablation tables are in
 [`summary_results.csv`](../artifacts/model/ablations/summary_results.csv) and
 [`season_results.csv`](../artifacts/model/ablations/season_results.csv).
@@ -41,7 +46,7 @@ adversarial mutation of `2021_06_HOU_IND` left all 1,281 current-or-earlier prot
 rows unchanged. The audit is recorded in
 [`leakage_audit.json`](../artifacts/model/leakage_audit.json).
 
-The repository currently has 18 passing tests covering feature construction, temporal
+The repository currently has 22 passing tests covering feature construction, temporal
 leakage, ablations, and the weekly prediction path.
 
 ## Limitations and risks
@@ -56,7 +61,8 @@ leakage, ablations, and the weekly prediction path.
   it did not improve walk-forward probability metrics.
 - Week-one cold-start games are omitted from the baseline.
 - Confidence tiers are not a substitute for calibration analysis or uncertainty
-  intervals.
+  intervals. Their thresholds remain communication-oriented because tier-level
+  reliability evidence is not stable enough to set new cutoffs.
 - The ablation comparison does not include confidence intervals or multiple-comparison
   correction; the selected configuration is a transparent engineering choice, not a
   claim of universal optimality.

@@ -49,5 +49,8 @@ The strongest lesson was that evaluation design mattered more than adding featur
 recent EPA history improved the walk-forward metrics, while the current pace proxy and
 rest differential added little. The play-by-play neutral-situation pace experiment did
 not improve walk-forward probability quality, so the feature remains available for
-research but is excluded from the selected production model. The next improvements are
-calibration analysis and an optional Streamlit presentation layer over the same pipeline.
+research but is excluded from the selected production model. A time-aware calibration
+experiment then selected sigmoid calibration by walk-forward probability metrics, while
+keeping the confidence-tier thresholds unchanged because the tier evidence was not yet
+stable enough. The next improvement is an optional Streamlit presentation layer over
+the same pipeline.
