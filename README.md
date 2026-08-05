@@ -53,7 +53,17 @@ Run the recruiter-facing Streamlit demo with saved artifacts by default:
 The dashboard includes weekly predictions, walk-forward calibration evidence, feature
 ablations, leakage-audit status, and links to the supporting documentation. Its refresh
 button runs the existing weekly CLI explicitly, so the interface does not duplicate
-model or feature-engineering logic.
+model or feature-engineering logic. The app opens in read-only artifact mode by default;
+enable local refreshes explicitly with `$env:NFL_ENABLE_REFRESH = "true"` before
+starting Streamlit.
+
+## Streamlit Community Cloud deployment
+
+The project is prepared for Streamlit Community Cloud with `app.py` as the entrypoint,
+`requirements.txt` in the repository root, and a deployment-safe read-only default.
+After pushing the standalone repository, create an app in Community Cloud and choose
+the `main` branch plus `app.py`. Keep `NFL_ENABLE_REFRESH` unset so public visitors use
+the committed artifacts rather than triggering data downloads.
 
 ## Project documentation
 

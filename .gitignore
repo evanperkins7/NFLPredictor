@@ -8,3 +8,10 @@ __pycache__/
 # Generated training data can be recreated with scripts/build_features.py.
 artifacts/features/*.csv
 
+# Keep the committed Week 1 example, but do not accumulate generated weekly runs.
+artifacts/predictions/predictions_*.csv
+artifacts/predictions/predictions_*.md
+artifacts/predictions/predictions_*.png
+
+# Local Streamlit secrets must never be committed.
+.streamlit/secrets.toml

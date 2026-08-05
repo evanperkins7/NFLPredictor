@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import pandas as pd
@@ -88,6 +89,11 @@ def show_trust() -> None:
         "It excludes betting lines, injuries, weather, and a week-one cold-start policy. "
         "Confidence tiers are communication aids, not guarantees."
     )
+
+
+def refresh_enabled() -> bool:
+    """Keep data downloads opt-in for local demos and disabled by default in deployment."""
+    return os.environ.get("NFL_ENABLE_REFRESH", "false").lower() in {"1", "true", "yes"}
     ablations = cached_csv(str(MODEL_ROOT / "ablations" / "summary_results.csv"))
     selected = ablations[(ablations["evaluation"] == "walk_forward") & (ablations["rolling_window"].astype(str) == "8")]
     st.dataframe(
@@ -119,16 +125,19 @@ def main() -> None:
         season = st.number_input("Season", min_value=1999, max_value=2100, value=default_season, step=1)
         week = st.number_input("Week", min_value=1, max_value=22, value=default_week, step=1)
         st.divider()
-        st.caption("Saved artifacts load by default. Refresh downloads nflverse data and may take a moment.")
-        if st.button("Refresh predictions", width="stretch"):
-            with st.spinner("Running the verified weekly pipeline…"):
-                result = refresh_predictions(PROJECT_ROOT, int(season), int(week))
-            if result.returncode == 0:
-                cached_predictions.clear()
-                st.success("Predictions refreshed.")
-            else:
-                st.error("Refresh failed. Check the pipeline output below.")
-                st.code(result.stderr or result.stdout)
+        if refresh_enabled():
+            st.caption("Refresh downloads nflverse data and may take a moment.")
+            if st.button("Refresh predictions", width="stretch"):
+                with st.spinner("Running the verified weekly pipeline…"):
+                    result = refresh_predictions(PROJECT_ROOT, int(season), int(week))
+                if result.returncode == 0:
+                    cached_predictions.clear()
+                    st.success("Predictions refreshed.")
+                else:
+                    st.error("Refresh failed. Check the pipeline output below.")
+                    st.code(result.stderr or result.stdout)
+        else:
+            st.caption("Read-only artifact mode. Set `NFL_ENABLE_REFRESH=true` for local refreshes.")
 
     predictions_tab, evaluation_tab, trust_tab = st.tabs(["Predictions", "Evaluation", "Trust"])
     with predictions_tab:
